@@ -15,7 +15,7 @@ func Jwt() fiber.Handler {
 		AuthScheme:  "Bearer",
 		ContextKey:  "l",
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			return responses.Error(false, "JWT validation failure", err)
+			return responses.Error("JWT validation failure", err)
 		},
 	}
 
