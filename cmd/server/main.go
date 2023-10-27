@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/Panitnun-6243/duckduck-server/internal/config"
 	"github.com/Panitnun-6243/duckduck-server/internal/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -10,6 +11,7 @@ import (
 )
 
 func main() {
+	cfg := config.LoadConfig()
 	db.Connect()
 	defer func(client *mongo.Client, ctx context.Context) {
 		err := client.Disconnect(ctx)
@@ -21,5 +23,5 @@ func main() {
 	app.Use(cors.New())
 
 	//router.SetupRoutes(app)
-	log.Fatal(app.Listen(":5050"))
+	log.Fatal(app.Listen(cfg.ServerAddress))
 }

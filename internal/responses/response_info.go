@@ -1,4 +1,4 @@
-package middlewares
+package responses
 
 type InfoResponse struct {
 	Success bool   `json:"success"`

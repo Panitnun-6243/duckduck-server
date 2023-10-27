@@ -1,4 +1,4 @@
-package middlewares
+package responses
 
 type ErrorInstance struct {
 	Message string `json:"message,omitempty"`
