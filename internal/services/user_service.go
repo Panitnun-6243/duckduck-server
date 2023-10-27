@@ -2,35 +2,60 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Panitnun-6243/duckduck-server/internal/models"
 	"github.com/Panitnun-6243/duckduck-server/internal/repositories"
-	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
-var validate = validator.New()
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+// for login
+func checkPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
 
 func RegisterUser(user *models.User) (*models.User, error) {
-	// Check if device is available
+	existingUser, err := repositories.FindUserByEmail(user.Email)
+	if err != nil {
+		log.Println(fmt.Sprintf("Error while finding user by email: %v", err))
+		return nil, err
+	}
+	if existingUser != nil {
+		log.Println("Email already registered")
+		return nil, errors.New("email already registered")
+	}
+
 	if !repositories.IsDeviceAvailable(user.DeviceCode) {
+		log.Println("Device code is not available or already used")
 		return nil, errors.New("device code is not available or already used")
 	}
 
-	err := validate.Struct(user)
+	hashedPassword, err := hashPassword(user.Password)
 	if err != nil {
 		return nil, err
 	}
+	user.Password = hashedPassword
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	user, err = repositories.CreateUser(user)
 	if err != nil {
+		log.Println(fmt.Sprintf("Error while creating user: %v", err))
 		return nil, err
 	}
-	user.Password = string(hashedPassword)
 
-	return repositories.CreateUser(user)
-}
+	err = repositories.MarkDeviceAsUsed(user.DeviceCode)
+	if err != nil {
+		log.Println(fmt.Sprintf("Error while marking device as used: %v", err))
+		return nil, err
+	}
 
-func LoginUser(email, password string) (string, error) {
-	// ... logic for user login ...
-	// This will include verifying hashed passwords, generating JWT tokens, etc.
+	return user, nil
 }

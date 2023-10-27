@@ -8,40 +8,37 @@ import (
 )
 
 func UserRoutes(app *fiber.App) {
-	app.Post("/api/v1/register", registerUser)
-	app.Post("/api/v1/login", loginUser)
-	// Add other routes
+	app.Post("/api/v1/register", registerHandler)
 }
 
-func registerUser(c *fiber.Ctx) error {
+func registerHandler(c *fiber.Ctx) error {
 	var user models.User
-
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Failed to parse request"))
+		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Bad request", err))
 	}
 
-	newUser, err := services.RegisterUser(&user)
+	registeredUser, err := services.RegisterUser(&user)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to register user", err))
+		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Registration failed", err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(responses.Info(newUser, "User registered successfully"))
+	return c.Status(fiber.StatusOK).JSON(responses.Info(registeredUser))
 }
 
-func loginUser(c *fiber.Ctx) error {
-	var request struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-
-	if err := c.BodyParser(&request); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Failed to parse request"))
-	}
-
-	token, err := services.LoginUser(request.Email, request.Password)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Login failed", err))
-	}
-
-	return c.Status(fiber.StatusOK).JSON(responses.Info(token, "Login successful"))
-}
+//func loginUser(c *fiber.Ctx) error {
+//	var request struct {
+//		Email    string `json:"email"`
+//		Password string `json:"password"`
+//	}
+//
+//	if err := c.BodyParser(&request); err != nil {
+//		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Failed to parse request"))
+//	}
+//
+//	token, err := services.LoginUser(request.Email, request.Password)
+//	if err != nil {
+//		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Login failed", err))
+//	}
+//
+//	return c.Status(fiber.StatusOK).JSON(responses.Info(token, "Login successful"))
+//}

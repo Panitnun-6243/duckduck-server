@@ -7,8 +7,10 @@ import (
 	"github.com/Panitnun-6243/duckduck-server/internal/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -20,8 +22,13 @@ func main() {
 			log.Fatal(err)
 		}
 	}(db.GetDB().Client(), nil)
+
 	app := fiber.New()
 	app.Use(cors.New())
+	app.Use(logger.New())
+	app.Get("/", func(ctx *fiber.Ctx) error {
+		return ctx.Status(http.StatusOK).JSON(fiber.Map{"message": "Welcome to DuckDuck API"})
+	})
 	routes.UserRoutes(app)
 
 	log.Fatal(app.Listen(cfg.ServerAddress))
