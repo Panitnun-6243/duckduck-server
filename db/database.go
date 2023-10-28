@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"github.com/Panitnun-6243/duckduck-server/internal/config"
+	"github.com/Panitnun-6243/duckduck-server/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"

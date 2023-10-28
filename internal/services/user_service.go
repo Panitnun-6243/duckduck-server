@@ -3,10 +3,13 @@ package services
 import (
 	"errors"
 	"fmt"
+	"github.com/Panitnun-6243/duckduck-server/config"
 	"github.com/Panitnun-6243/duckduck-server/internal/models"
 	"github.com/Panitnun-6243/duckduck-server/internal/repositories"
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"time"
 )
 
 func hashPassword(password string) (string, error) {
@@ -17,10 +20,20 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), nil
 }
 
-// for login
 func checkPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func generateToken(user *models.User) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Subject:   user.ID.Hex(),
+		IssuedAt:  time.Now().Unix(),
+		ExpiresAt: time.Now().Add(730 * time.Hour).Unix(),
+	})
+
+	cfg := config.LoadConfig()
+	return token.SignedString([]byte(cfg.JWTSecret))
 }
 
 func RegisterUser(user *models.User) (*models.User, error) {
@@ -58,4 +71,25 @@ func RegisterUser(user *models.User) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func LoginUser(email, password string) (string, error) {
+	user, err := repositories.FindUserByEmail(email)
+	if err != nil {
+		return "", err
+	}
+	if user == nil {
+		return "", errors.New("user not found")
+	}
+
+	if !checkPasswordHash(password, user.Password) {
+		return "", errors.New("invalid password")
+	}
+
+	token, err := generateToken(user)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }

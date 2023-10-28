@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/Panitnun-6243/duckduck-server/internal/config"
+	"github.com/Panitnun-6243/duckduck-server/config"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
 )

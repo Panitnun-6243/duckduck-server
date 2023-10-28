@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
-	"github.com/Panitnun-6243/duckduck-server/internal/db"
+	"github.com/Panitnun-6243/duckduck-server/db"
 	"github.com/Panitnun-6243/duckduck-server/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,6 +19,7 @@ func CreateUser(user *models.User) (*models.User, error) {
 	return user, nil
 }
 
+// FindUserByEmail for check existing user
 func FindUserByEmail(email string) (*models.User, error) {
 	var user models.User
 	err := db.GetDB().Collection("users").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)

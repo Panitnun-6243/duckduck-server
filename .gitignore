@@ -36,4 +36,3 @@ go.work
 vendor/
 vendor
 /Godeps/
-service-account-key.json

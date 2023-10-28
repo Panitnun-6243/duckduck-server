@@ -9,6 +9,7 @@ import (
 
 func UserRoutes(app *fiber.App) {
 	app.Post("/api/v1/register", registerHandler)
+	app.Post("/api/v1/login", loginHandler)
 }
 
 func registerHandler(c *fiber.Ctx) error {
@@ -25,20 +26,18 @@ func registerHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(responses.Info(registeredUser))
 }
 
-//func loginUser(c *fiber.Ctx) error {
-//	var request struct {
-//		Email    string `json:"email"`
-//		Password string `json:"password"`
-//	}
-//
-//	if err := c.BodyParser(&request); err != nil {
-//		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Failed to parse request"))
-//	}
-//
-//	token, err := services.LoginUser(request.Email, request.Password)
-//	if err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Login failed", err))
-//	}
-//
-//	return c.Status(fiber.StatusOK).JSON(responses.Info(token, "Login successful"))
-//}
+func loginHandler(c *fiber.Ctx) error {
+	var user models.User
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Bad request", err))
+	}
+
+	token, err := services.LoginUser(user.Email, user.Password)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.Error("Login failed", err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(responses.Info(map[string]string{
+		"token": token,
+	}))
+}
