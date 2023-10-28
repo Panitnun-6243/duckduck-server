@@ -30,6 +30,7 @@ func main() {
 		return ctx.Status(http.StatusOK).JSON(fiber.Map{"message": "Welcome to DuckDuck API"})
 	})
 	routes.UserRoutes(app)
+	routes.AlarmRoutes(app)
 
 	log.Fatal(app.Listen(cfg.ServerAddress))
 }

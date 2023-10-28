@@ -32,6 +32,15 @@ func FindAlarmByUserID(userID primitive.ObjectID) ([]*models.Alarm, error) {
 	return alarms, nil
 }
 
+func FindAlarmByAlarmIDAndUserID(alarmID, userID primitive.ObjectID) (*models.Alarm, error) {
+	var alarm *models.Alarm
+	err := db.GetDB().Collection("alarms").FindOne(context.TODO(), bson.M{"_id": alarmID, "user_id": userID}).Decode(&alarm)
+	if err != nil {
+		return nil, err
+	}
+	return alarm, nil
+}
+
 func UpdateAlarm(alarmID primitive.ObjectID, updatedData bson.M) error {
 	_, err := db.GetDB().Collection("alarms").UpdateOne(context.TODO(), bson.M{"_id": alarmID}, bson.M{"$set": updatedData})
 	return err
