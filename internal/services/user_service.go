@@ -93,3 +93,15 @@ func LoginUser(email, password string) (string, error) {
 
 	return token, nil
 }
+
+func GetUserInfo(userID string) (*models.User, error) {
+	return repositories.FindUserByID(userID)
+}
+
+func UpdateUserProfile(userID, name, avatarURL string) (*models.User, error) {
+	user, err := repositories.UpdateUserDetails(userID, name, avatarURL)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
