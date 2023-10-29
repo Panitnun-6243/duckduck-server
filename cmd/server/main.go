@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/Panitnun-6243/duckduck-server/config"
-	"github.com/Panitnun-6243/duckduck-server/db"
+	"github.com/Panitnun-6243/duckduck-server/database"
 	"github.com/Panitnun-6243/duckduck-server/internal/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

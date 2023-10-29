@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"context"
-	"github.com/Panitnun-6243/duckduck-server/db"
+	"github.com/Panitnun-6243/duckduck-server/database"
 	"github.com/Panitnun-6243/duckduck-server/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
