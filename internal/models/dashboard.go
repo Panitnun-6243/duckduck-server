@@ -1,6 +1,9 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
+)
 
 type DashboardConfig struct {
 	ID            primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
@@ -9,6 +12,8 @@ type DashboardConfig struct {
 	Weather       WeatherConfig      `bson:"weather" json:"weather"`
 	Traffic       TrafficConfig      `bson:"traffic" json:"traffic"`
 	EventCalendar EventCalendar      `bson:"event_calendar" json:"event_calendar"`
+	CreatedAt     time.Time          `bson:"created_at" json:"created_at"`
+	UpdatedAt     time.Time          `bson:"updated_at" json:"updated_at"`
 }
 
 type ClockConfig struct {
