@@ -23,6 +23,7 @@ func main() {
 		}
 	}(db.GetDB().Client(), nil)
 
+	// mqtt -> utils.Init()
 	app := fiber.New()
 	app.Use(cors.New())
 	app.Use(logger.New())
