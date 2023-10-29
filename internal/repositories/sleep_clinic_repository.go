@@ -1,22 +1,30 @@
 package repositories
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+	"github.com/Panitnun-6243/duckduck-server/db"
+	"github.com/Panitnun-6243/duckduck-server/internal/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
+)
 
-type SleepClinic struct {
-	ID                    primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	UserID                primitive.ObjectID `bson:"user_id" json:"user_id"`
-	SleepStats            []SleepStat        `bson:"sleep_stats" json:"sleep_stats"`
-	CurrentLullabySong    string             `bson:"current_lullaby_song" json:"current_lullaby_song"`
-	CustomLullabySongPath string             `bson:"custom_lullaby_song_path" json:"custom_lullaby_song_path"`
-	DimLight              DimLight           `bson:"dim_light" json:"dim_light"`
+func CreateDefaultSleepClinicData(sleepClinic *models.SleepClinic) (*models.SleepClinic, error) {
+	_, err := db.GetDB().Collection("sleep_clinics").InsertOne(context.TODO(), sleepClinic)
+	if err != nil {
+		log.Printf("Error while inserting default sleep clinic data: %v", err)
+		return nil, err
+	}
+	return sleepClinic, nil
 }
 
-type SleepStat struct {
-	Date               string  `bson:"date" json:"date"`
-	SleepDurationHours float64 `bson:"sleep_duration_hours" json:"sleep_duration_hours"`
+func FindSleepClinicByUserID(userID primitive.ObjectID) (*models.SleepClinic, error) {
+	var sleepClinic *models.SleepClinic
+	err := db.GetDB().Collection("sleep_clinics").FindOne(context.TODO(), bson.M{"user_id": userID}).Decode(&sleepClinic)
+	return sleepClinic, err
 }
 
-type DimLight struct {
-	IsActive bool `bson:"is_active" json:"is_active"`
-	Duration int  `bson:"duration" json:"duration"` // Duration in minutes
+func UpdateSleepClinicData(sleepClinicID primitive.ObjectID, updatedData bson.M) error {
+	_, err := db.GetDB().Collection("sleep_clinics").UpdateOne(context.TODO(), bson.M{"_id": sleepClinicID}, bson.M{"$set": updatedData})
+	return err
 }
