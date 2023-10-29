@@ -75,6 +75,11 @@ func RegisterUser(user *models.User) (*models.User, error) {
 		log.Println(fmt.Sprintf("Error while creating default light control: %v", err))
 		return nil, err
 	}
+	_, err = CreateDefaultDashboardConfig(user.ID)
+	if err != nil {
+		log.Println(fmt.Sprintf("Error while creating default dashboard configuration: %v", err))
+		return nil, err
+	}
 
 	return user, nil
 }

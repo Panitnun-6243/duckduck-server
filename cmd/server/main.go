@@ -32,6 +32,7 @@ func main() {
 	routes.UserRoutes(app)
 	routes.AlarmRoutes(app)
 	routes.LightControlRoutes(app)
+	routes.DashboardRoutes(app)
 
 	log.Fatal(app.Listen(cfg.ServerAddress))
 }
