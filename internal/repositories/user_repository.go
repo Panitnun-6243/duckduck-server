@@ -12,6 +12,8 @@ import (
 )
 
 func CreateUser(user *models.User) (*models.User, error) {
+	// Manual set user id to new object id
+	user.ID = primitive.NewObjectID()
 	_, err := db.GetDB().Collection("users").InsertOne(context.TODO(), user)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error while inserting user: %v", err))

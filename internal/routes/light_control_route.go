@@ -11,8 +11,8 @@ import (
 )
 
 func LightControlRoutes(app *fiber.App) {
-	app.Get("/api/v1/light-controls", middlewares.Jwt(), getLightControlHandler)
-	app.Put("/api/v1/light-controls/:id", middlewares.Jwt(), updateLightControlHandler)
+	app.Get("/api/v1/light-control", middlewares.Jwt(), getLightControlHandler)
+	app.Put("/api/v1/light-control/:id", middlewares.Jwt(), updateLightControlHandler)
 }
 
 func getLightControlHandler(c *fiber.Ctx) error {

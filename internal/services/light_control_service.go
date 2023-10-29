@@ -8,9 +8,10 @@ import (
 	"time"
 )
 
-func CreateDefaultLightControl(user *models.User) (*models.LightControl, error) {
+func CreateDefaultLightControl(user primitive.ObjectID) (*models.LightControl, error) {
 	defaultLightControlData := &models.LightControl{
-		UserID:               user.ID,
+		UserID:               user,
+		Connected:            false,
 		SwitchStatus:         "off",
 		BrightnessPercentage: 51.0,
 		ColorMode:            "cct",
@@ -36,6 +37,7 @@ func UpdateUserLightControl(controlID primitive.ObjectID, updatedData *models.Li
 
 	updateMap := bson.M{
 		"switch_status":         updatedData.SwitchStatus,
+		"connected":             updatedData.Connected,
 		"brightness_percentage": updatedData.BrightnessPercentage,
 		"color_mode":            updatedData.ColorMode,
 		"cct_temp":              updatedData.CctTemp,
