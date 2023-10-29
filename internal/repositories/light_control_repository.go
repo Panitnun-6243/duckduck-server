@@ -24,6 +24,16 @@ func FindLightControlByUserID(userID primitive.ObjectID) (*models.LightControl, 
 	return lightControl, err
 }
 
+func FindLightControlByIDAndUserID(controlID, userID primitive.ObjectID) (*models.LightControl, error) {
+	var lightControl *models.LightControl
+	filter := bson.M{
+		"_id":     controlID,
+		"user_id": userID,
+	}
+	err := db.GetDB().Collection("light_controls").FindOne(context.TODO(), filter).Decode(&lightControl)
+	return lightControl, err
+}
+
 func UpdateLightControl(controlID primitive.ObjectID, updatedData bson.M) error {
 	_, err := db.GetDB().Collection("light_controls").UpdateOne(context.TODO(), bson.M{"_id": controlID}, bson.M{"$set": updatedData})
 	return err

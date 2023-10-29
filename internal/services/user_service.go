@@ -70,6 +70,12 @@ func RegisterUser(user *models.User) (*models.User, error) {
 		return nil, err
 	}
 
+	_, err = CreateDefaultLightControl(user)
+	if err != nil {
+		log.Println(fmt.Sprintf("Error while creating default light control: %v", err))
+		return nil, err
+	}
+
 	return user, nil
 }
 
