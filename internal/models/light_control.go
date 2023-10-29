@@ -8,6 +8,7 @@ import (
 type LightControl struct {
 	ID                   primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	UserID               primitive.ObjectID `bson:"user_id" json:"user_id"`
+	SwitchStatus         string             `bson:"switch_status" json:"switch_status"`
 	BrightnessPercentage float64            `bson:"brightness_percentage" json:"brightness_percentage"`
 	ColorMode            string             `bson:"color_mode" json:"color_mode"`
 	CctTemp              int                `bson:"cct_temp" json:"cct_temp"`
