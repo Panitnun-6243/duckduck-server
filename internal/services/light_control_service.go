@@ -12,11 +12,11 @@ func CreateDefaultLightControl(user primitive.ObjectID) (*models.LightControl, e
 	defaultLightControlData := &models.LightControl{
 		UserID:               user,
 		Connected:            false,
-		SwitchStatus:         "off",
+		SwitchStatus:         false,
 		BrightnessPercentage: 51.0,
 		ColorMode:            "cct",
 		CctTemp:              3000,
-		RgbColor:             "0xfff2DB6F",
+		HslColor:             models.Hsl{Hue: 0, Saturation: 0, Lightness: 0},
 	}
 	defaultLightControlData.CreatedAt = time.Now()
 	defaultLightControlData.UpdatedAt = time.Now()
@@ -36,13 +36,13 @@ func UpdateUserLightControl(controlID primitive.ObjectID, updatedData *models.Li
 	updatedData.UpdatedAt = time.Now()
 
 	updateMap := bson.M{
-		"switch_status":         updatedData.SwitchStatus,
-		"connected":             updatedData.Connected,
-		"brightness_percentage": updatedData.BrightnessPercentage,
-		"color_mode":            updatedData.ColorMode,
-		"cct_temp":              updatedData.CctTemp,
-		"rgb_color":             updatedData.RgbColor,
-		"updated_at":            updatedData.UpdatedAt,
+		"on":         updatedData.SwitchStatus,
+		"connected":  updatedData.Connected,
+		"brightness": updatedData.BrightnessPercentage,
+		"color_mode": updatedData.ColorMode,
+		"temp":       updatedData.CctTemp,
+		"hsl_color":  updatedData.HslColor,
+		"updated_at": updatedData.UpdatedAt,
 	}
 
 	err := repositories.UpdateLightControl(controlID, updateMap)

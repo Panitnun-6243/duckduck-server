@@ -9,11 +9,17 @@ type LightControl struct {
 	ID                   primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	UserID               primitive.ObjectID `bson:"user_id" json:"user_id"`
 	Connected            bool               `bson:"connected" json:"connected"`
-	SwitchStatus         string             `bson:"switch_status" json:"switch_status"`
-	BrightnessPercentage float64            `bson:"brightness_percentage" json:"brightness_percentage"`
+	SwitchStatus         bool               `bson:"on" json:"on"`
+	BrightnessPercentage float64            `bson:"brightness" json:"brightness"`
 	ColorMode            string             `bson:"color_mode" json:"color_mode"`
-	CctTemp              int                `bson:"cct_temp" json:"cct_temp"`
-	RgbColor             string             `bson:"rgb_color" json:"rgb_color"`
+	CctTemp              int                `bson:"temp" json:"temp"`
+	HslColor             Hsl                `bson:"hsl_color" json:"hsl_color"`
 	CreatedAt            time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt            time.Time          `bson:"updated_at" json:"updated_at"`
+}
+
+type Hsl struct {
+	Hue        int `bson:"h" json:"h"`
+	Saturation int `bson:"s" json:"s"`
+	Lightness  int `bson:"l" json:"l"`
 }
