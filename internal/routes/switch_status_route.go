@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Panitnun-6243/duckduck-server/internal/middlewares"
-	"github.com/Panitnun-6243/duckduck-server/internal/models"
 	"github.com/Panitnun-6243/duckduck-server/internal/responses"
 	"github.com/Panitnun-6243/duckduck-server/internal/services"
 	"github.com/Panitnun-6243/duckduck-server/util"
@@ -14,33 +13,33 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func HslLightRoutes(app *fiber.App) {
-	app.Get("/api/v1/hsl-light", middlewares.Jwt(), getHslLightHandler)
-	app.Patch("/api/v1/hsl-light/:id", middlewares.Jwt(), updateHslLightHandler)
+func SwitchStatusRoutes(app *fiber.App) {
+	app.Get("/api/v1/switch-status", middlewares.Jwt(), getSwitchStatusHandler)
+	app.Patch("/api/v1/switch-status/:id", middlewares.Jwt(), updateSwitchStatusHandler)
 }
 
-func getHslLightHandler(c *fiber.Ctx) error {
+func getSwitchStatusHandler(c *fiber.Ctx) error {
 	claims := c.Locals("l").(*jwt.Token).Claims.(jwt.MapClaims)
 	userID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))
 
-	hslLight, err := services.GetHslLightByUser(userID)
+	on, err := services.GetSwitchStatusByUser(userID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(responses.Error("Cannot get hsl color", err))
+		return c.Status(fiber.StatusNotFound).JSON(responses.Error("Cannot get switch status", err))
 	}
-	return c.Status(fiber.StatusOK).JSON(responses.Info(bson.M{"hsl_color": hslLight}))
+	return c.Status(fiber.StatusOK).JSON(responses.Info(bson.M{"on": on}))
 }
 
-func updateHslLightHandler(c *fiber.Ctx) error {
+func updateSwitchStatusHandler(c *fiber.Ctx) error {
 	var requestBody struct {
-		HslColor models.Hsl `json:"hsl_color"`
+		SwitchStatus bool `json:"on"`
 	}
 	if err := c.BodyParser(&requestBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Bad request", err))
 	}
 
-	hslID, err := primitive.ObjectIDFromHex(c.Params("id"))
+	switchID, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Invalid hsl light ID", err))
+		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Invalid switch ID", err))
 	}
 
 	// Extract userID from JWT claims
@@ -48,27 +47,24 @@ func updateHslLightHandler(c *fiber.Ctx) error {
 	userID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))
 
 	// Check if the user is authorized to update this light control
-	_, err = services.GetHslLightByIDAndUserID(hslID, userID)
+	_, err = services.GetSwitchStatusByIDAndUserID(switchID, userID)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(responses.Error("Unauthorized", nil))
 	}
 
-	err = services.UpdateUserHslLight(hslID, requestBody.HslColor)
+	err = services.UpdateUserSwitchStatus(switchID, requestBody.SwitchStatus)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Hsl light update failed", err))
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Switch status update failed", err))
 	}
-	
+
 	// Publish the update to MQTT
 	deviceCode := "SSAC12"
-	mqttTopic := fmt.Sprintf("%s/hsl", deviceCode)
+	mqttTopic := fmt.Sprintf("%s/power", deviceCode)
 	filter := bson.M{
-		"h": requestBody.HslColor.Hue,
-		"s": requestBody.HslColor.Saturation,
-		"l": requestBody.HslColor.Lightness,
+		"on": requestBody.SwitchStatus,
 	}
 	payload, _ := json.Marshal(filter) // Convert the updatedControl struct to JSON
 	client := util.CreateMqttClient()
 	util.Publish(client, mqttTopic, string(payload))
-
-	return c.Status(fiber.StatusOK).JSON(responses.Info("Hsl light updated successfully"))
+	return c.Status(fiber.StatusOK).JSON(responses.Info("Switch status updated successfully"))
 }
