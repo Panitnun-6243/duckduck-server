@@ -32,6 +32,6 @@ func UpdateUserSleepClinic(sleepClinicID primitive.ObjectID, updatedData *models
 		"dim_light":                updatedData.DimLight,
 	}
 	err := repositories.UpdateSleepClinicData(sleepClinicID, updateMap)
-	//utils.Publish("sleep_clinic/update", "Updated Sleep Clinic Data")
+
 	return err
 }

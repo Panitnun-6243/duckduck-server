@@ -8,8 +8,8 @@ import (
 type Alarm struct {
 	ID                    primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	UserID                primitive.ObjectID `bson:"user_id" json:"user_id"`
-	BedTime               TimeModel          `bson:"bed_time" json:"bed_time"`
-	WakeUpTime            TimeModel          `bson:"wake_up_time" json:"wake_up_time"`
+	BedTime               *TimeModel         `bson:"bed_time" json:"bed_time"`
+	WakeUpTime            *TimeModel         `bson:"wake_up_time" json:"wake_up_time"`
 	Description           string             `bson:"description" json:"description"`
 	IsActive              ActiveStatus       `bson:"is_active" json:"is_active"`
 	RepeatDays            []string           `bson:"repeat_days" json:"repeat_days"`
@@ -33,6 +33,6 @@ type ActiveStatus struct {
 }
 
 type Sunrise struct {
-	StartTime TimeModel `bson:"start_time" json:"start_time"`
-	PeakTime  TimeModel `bson:"peak_time" json:"peak_time"`
+	StartTime *TimeModel `bson:"start_time" json:"start_time"`
+	PeakTime  *TimeModel `bson:"peak_time" json:"peak_time"`
 }

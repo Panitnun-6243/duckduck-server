@@ -5,6 +5,7 @@ import (
 	"github.com/Panitnun-6243/duckduck-server/config"
 	"github.com/Panitnun-6243/duckduck-server/database"
 	"github.com/Panitnun-6243/duckduck-server/internal/routes"
+	"github.com/Panitnun-6243/duckduck-server/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -23,7 +24,7 @@ func main() {
 		}
 	}(db.GetDB().Client(), nil)
 
-	// mqtt -> utils.Init()
+	util.CreateMqttClient()
 	app := fiber.New()
 	app.Use(cors.New())
 	app.Use(logger.New())

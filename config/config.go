@@ -11,6 +11,10 @@ type Config struct {
 	JWTSecret     string
 	ServerAddress string
 	DatabaseName  string
+	MqttBroker    string
+	MqttClientID  string
+	MqttUsername  string
+	MqttPassword  string
 }
 
 func init() {
@@ -25,7 +29,11 @@ func LoadConfig() *Config {
 		MongoURI:      getEnv("MONGO_URI", "mongodb://localhost:27017"),
 		DatabaseName:  getEnv("DATABASE_NAME", "default_db_name"),
 		JWTSecret:     getEnv("JWT_SECRET_KEY", "default_secret"),
-		ServerAddress: getEnv("SERVER_ADDRESS", ":5050"), // Keeping the default value here
+		ServerAddress: getEnv("SERVER_ADDRESS", ":5050"),
+		MqttBroker:    getEnv("MQTT_BROKER", "tcp://broker.hivemq.com:1883"),
+		MqttClientID:  getEnv("MQTT_CLIENT_ID", "default_client_id"),
+		MqttUsername:  getEnv("MQTT_USERNAME", "default_username"),
+		MqttPassword:  getEnv("MQTT_PASSWORD", "default_password"),
 	}
 }
 
