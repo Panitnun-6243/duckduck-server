@@ -10,6 +10,8 @@ import (
 )
 
 func CreateAlarm(alarm *models.Alarm) (*models.Alarm, error) {
+	// Manual set user id to new object id
+	alarm.ID = primitive.NewObjectID()
 	_, err := db.GetDB().Collection("alarms").InsertOne(context.TODO(), alarm)
 	if err != nil {
 		log.Printf("Error while inserting alarm: %v", err)

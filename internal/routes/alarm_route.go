@@ -11,6 +11,7 @@ import (
 	"github.com/Panitnun-6243/duckduck-server/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -41,7 +42,8 @@ func createAlarmHandler(c *fiber.Ctx) error {
 	}
 
 	// Publish the update to MQTT
-	mqttTopic := fmt.Sprintf("ANAKIN99/%s", "create-alarm")
+	deviceCode := "SSAC12"
+	mqttTopic := fmt.Sprintf("%s/create-alarm", deviceCode)
 	payload, _ := json.Marshal(createdAlarm) // Convert the updatedControl struct to JSON
 	client := util.CreateMqttClient()
 	util.Publish(client, mqttTopic, string(payload))
@@ -84,6 +86,15 @@ func updateAlarmHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Alarm update failed", err))
 	}
 
+	// Publish the update to MQTT
+	deviceCode := "SSAC12"
+	mqttTopic := fmt.Sprintf("%s/update-alarm", deviceCode)
+	updatedAlarm.ID = alarmID
+	updatedAlarm.UserID = userID
+	payload, _ := json.Marshal(updatedAlarm) // Convert the updatedControl struct to JSON
+	client := util.CreateMqttClient()
+	util.Publish(client, mqttTopic, string(payload))
+
 	return c.Status(fiber.StatusOK).JSON(responses.Info("Alarm updated successfully"))
 }
 
@@ -109,6 +120,16 @@ func deleteAlarmHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(responses.Error("Alarm deletion failed", err))
 	}
+
+	// Publish the update to MQTT
+	deviceCode := "SSAC12"
+	mqttTopic := fmt.Sprintf("%s/delete-alarm", deviceCode)
+	filter := bson.M{
+		"id": alarmID,
+	}
+	payload, _ := json.Marshal(filter) // Convert the updatedControl struct to JSON
+	client := util.CreateMqttClient()
+	util.Publish(client, mqttTopic, string(payload))
 
 	return c.Status(fiber.StatusOK).JSON(responses.Info("Alarm deleted successfully"))
 }
