@@ -39,5 +39,6 @@ func main() {
 	routes.SleepClinicRoutes(app)
 	routes.HslLightRoutes(app)
 	routes.SwitchStatusRoutes(app)
+	routes.CctLightRoutes(app)
 	log.Fatal(app.Listen(cfg.ServerAddress))
 }
