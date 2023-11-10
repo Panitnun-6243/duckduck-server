@@ -51,11 +51,5 @@ func updateLightControlHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Light control update failed", err))
 	}
 
-	// Publish the update to MQTT
-	//mqttTopic := fmt.Sprintf("SSAC12/%s", updatedControl.ColorMode)
-	//payload, _ := json.Marshal(updatedControl) // Convert the updatedControl struct to JSON
-	//client := util.CreateMqttClient()
-	//util.Publish(client, mqttTopic, string(payload))
-
 	return c.Status(fiber.StatusOK).JSON(responses.Info("Light control updated successfully"))
 }
