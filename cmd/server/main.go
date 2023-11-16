@@ -40,6 +40,7 @@ func main() {
 	routes.HslLightRoutes(app)
 	routes.SwitchStatusRoutes(app)
 	routes.CctLightRoutes(app)
+	routes.DeviceRoutes(app)
 
 	// Start the server
 	log.Fatal(app.Listen(cfg.ServerAddress))

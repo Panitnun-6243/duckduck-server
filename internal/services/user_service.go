@@ -25,11 +25,20 @@ func checkPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func generateToken(user *models.User) (string, error) {
+func generateToken(user *models.User, isDevice bool) (string, error) {
+	var expTime time.Time
+	if isDevice {
+		// For devices, use a longer expiration time.
+		expTime = time.Now().Add(876000 * time.Hour)
+	} else {
+		// For regular users, use a shorter expiration time.
+		expTime = time.Now().Add(730 * time.Hour)
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Subject:   user.ID.Hex(),
 		IssuedAt:  time.Now().Unix(),
-		ExpiresAt: time.Now().Add(730 * time.Hour).Unix(),
+		ExpiresAt: expTime.Unix(),
 	})
 
 	cfg := config.LoadConfig()
@@ -86,6 +95,13 @@ func RegisterUser(user *models.User) (*models.User, error) {
 		return nil, err
 	}
 
+	// Bind the user ID to the device
+	err = repositories.BindUserToDevice(user.ID, user.DeviceCode)
+	if err != nil {
+		log.Println(fmt.Sprintf("Error while binding user to device: %v", err))
+		return nil, err
+	}
+
 	return user, nil
 }
 
@@ -102,7 +118,7 @@ func LoginUser(email, password string) (string, error) {
 		return "", errors.New("invalid password")
 	}
 
-	token, err := generateToken(user)
+	token, err := generateToken(user, false)
 	if err != nil {
 		return "", err
 	}
