@@ -1,10 +1,14 @@
 package services
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/Panitnun-6243/duckduck-server/internal/models"
 	"github.com/Panitnun-6243/duckduck-server/internal/repositories"
+	"github.com/Panitnun-6243/duckduck-server/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"time"
 )
 
@@ -44,4 +48,21 @@ func UpdateUserAlarm(alarmID primitive.ObjectID, updatedData *models.Alarm) erro
 
 func RemoveAlarm(alarmID primitive.ObjectID) error {
 	return repositories.DeleteAlarm(alarmID)
+}
+
+func TriggerAlarm(userID primitive.ObjectID, alarmID primitive.ObjectID) error {
+	// Fetch the device code for the user
+	deviceCode, err := repositories.FindDeviceCodeByUserID(userID)
+	if err != nil {
+		log.Printf("Error while fetching device code: %v", err)
+		return err
+	}
+
+	// Proceed to publish MQTT event with the retrieved device code
+	mqttTopic := fmt.Sprintf("%s/trigger-alarm", deviceCode)
+	payload, _ := json.Marshal(map[string]string{"id": alarmID.Hex()})
+	client := util.CreateMqttClient()
+	util.Publish(client, mqttTopic, string(payload))
+
+	return nil
 }

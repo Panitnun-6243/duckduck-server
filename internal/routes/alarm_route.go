@@ -156,12 +156,9 @@ func triggerAlarmHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(responses.Error("Unauthorized", nil))
 	}
 
-	// Publish the MQTT event
-	deviceCode := "SSAC12"
-	mqttTopic := fmt.Sprintf("%s/trigger-alarm", deviceCode)
-	payload, _ := json.Marshal(triggerRequest)
-	client := util.CreateMqttClient()
-	util.Publish(client, mqttTopic, string(payload))
-
+	err = services.TriggerAlarm(userID, alarmID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to trigger alarm", err))
+	}
 	return c.Status(fiber.StatusOK).JSON(responses.Info("Alarm is triggered successfully"))
 }
