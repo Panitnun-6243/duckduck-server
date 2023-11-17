@@ -36,3 +36,7 @@ type Sunrise struct {
 	StartTime *TimeModel `bson:"start_time" json:"start_time"`
 	PeakTime  *TimeModel `bson:"peak_time" json:"peak_time"`
 }
+
+type TriggerAlarmRequest struct {
+	ID string `json:"id"`
+}

@@ -18,8 +18,9 @@ import (
 func AlarmRoutes(app *fiber.App) {
 	app.Post("/api/v1/alarms", middlewares.Jwt(), createAlarmHandler)
 	app.Get("/api/v1/alarms", middlewares.Jwt(), getAlarmsHandler)
-	app.Put("/api/v1/alarms/:id", middlewares.Jwt(), updateAlarmHandler) // <-- Add this route
+	app.Put("/api/v1/alarms/:id", middlewares.Jwt(), updateAlarmHandler)
 	app.Delete("/api/v1/alarms/:id", middlewares.Jwt(), deleteAlarmHandler)
+	app.Post("/api/v1/alarms/:alarmId/trigger", middlewares.Jwt(), triggerAlarmHandler)
 }
 
 func createAlarmHandler(c *fiber.Ctx) error {
@@ -132,4 +133,35 @@ func deleteAlarmHandler(c *fiber.Ctx) error {
 	util.Publish(client, mqttTopic, string(payload))
 
 	return c.Status(fiber.StatusOK).JSON(responses.Info("Alarm deleted successfully"))
+}
+
+func triggerAlarmHandler(c *fiber.Ctx) error {
+	var triggerRequest models.TriggerAlarmRequest
+	if err := c.BodyParser(&triggerRequest); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Bad request", err))
+	}
+
+	alarmID, err := primitive.ObjectIDFromHex(c.Params("alarmId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Invalid alarm ID", err))
+	}
+
+	// Extract userID from JWT claims
+	claims := c.Locals("l").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))
+
+	// Check if the user is authorized to trigger this alarm
+	alarm, err := repositories.FindAlarmByAlarmIDAndUserID(alarmID, userID)
+	if err != nil || alarm == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.Error("Unauthorized", nil))
+	}
+
+	// Publish the MQTT event
+	deviceCode := "SSAC12"
+	mqttTopic := fmt.Sprintf("%s/trigger-alarm", deviceCode)
+	payload, _ := json.Marshal(triggerRequest)
+	client := util.CreateMqttClient()
+	util.Publish(client, mqttTopic, string(payload))
+
+	return c.Status(fiber.StatusOK).JSON(responses.Info("Alarm is triggered successfully"))
 }
