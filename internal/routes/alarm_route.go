@@ -43,7 +43,10 @@ func createAlarmHandler(c *fiber.Ctx) error {
 	}
 
 	// Publish the update to MQTT
-	deviceCode := "SSAC12"
+	deviceCode, err := services.GetDeviceCodeByUserID(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to get device code", err))
+	}
 	mqttTopic := fmt.Sprintf("%s/create-alarm", deviceCode)
 	payload, _ := json.Marshal(createdAlarm) // Convert the updatedControl struct to JSON
 	client := util.CreateMqttClient()
@@ -88,7 +91,10 @@ func updateAlarmHandler(c *fiber.Ctx) error {
 	}
 
 	// Publish the update to MQTT
-	deviceCode := "SSAC12"
+	deviceCode, err := services.GetDeviceCodeByUserID(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to get device code", err))
+	}
 	mqttTopic := fmt.Sprintf("%s/update-alarm", deviceCode)
 	updatedAlarm.ID = alarmID
 	updatedAlarm.UserID = userID
@@ -123,7 +129,10 @@ func deleteAlarmHandler(c *fiber.Ctx) error {
 	}
 
 	// Publish the update to MQTT
-	deviceCode := "SSAC12"
+	deviceCode, err := services.GetDeviceCodeByUserID(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to get device code", err))
+	}
 	mqttTopic := fmt.Sprintf("%s/delete-alarm", deviceCode)
 	filter := bson.M{
 		"id": alarmID,

@@ -58,7 +58,10 @@ func updateSwitchStatusHandler(c *fiber.Ctx) error {
 	}
 
 	// Publish the update to MQTT
-	deviceCode := "SSAC12"
+	deviceCode, err := services.GetDeviceCodeByUserID(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to get device code", err))
+	}
 	mqttTopic := fmt.Sprintf("%s/power", deviceCode)
 	filter := bson.M{
 		"on": requestBody.SwitchStatus,

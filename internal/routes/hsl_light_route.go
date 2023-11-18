@@ -57,9 +57,12 @@ func updateHslLightHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Hsl light update failed", err))
 	}
-	
+
 	// Publish the update to MQTT
-	deviceCode := "SSAC12"
+	deviceCode, err := services.GetDeviceCodeByUserID(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to get device code", err))
+	}
 	mqttTopic := fmt.Sprintf("%s/hsl", deviceCode)
 	filter := bson.M{
 		"h": requestBody.HslColor.Hue,

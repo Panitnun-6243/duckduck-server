@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"github.com/Panitnun-6243/duckduck-server/internal/repositories"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func DeviceLogin(deviceCode, secret string) (string, error) {
@@ -29,4 +30,13 @@ func DeviceLogin(deviceCode, secret string) (string, error) {
 	}
 
 	return token, nil
+}
+
+// GetDeviceCodeByUserID returns the device code of the user
+func GetDeviceCodeByUserID(userID primitive.ObjectID) (string, error) {
+	deviceCode, err := repositories.FindDeviceCodeByUserID(userID)
+	if err != nil {
+		return "", err
+	}
+	return deviceCode, nil
 }
