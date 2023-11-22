@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-const protocol = "ssl"
-const port = 8883
+const protocol = "tcp"
+const port = 1883
 
 func CreateMqttClient() mqtt.Client {
 	cfg := config.LoadConfig()
