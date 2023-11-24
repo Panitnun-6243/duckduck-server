@@ -20,3 +20,21 @@ type DimLight struct {
 	IsActive bool `bson:"is_active" json:"is_active"`
 	Duration int  `bson:"duration" json:"duration"` // Duration in minutes
 }
+
+type CustomLullabySong struct {
+	UserID primitive.ObjectID `bson:"user_id" json:"user_id"`
+	Songs  []LullabyDetail    `bson:"songs" json:"songs"`
+}
+
+type PresetLullabySong struct {
+	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Name     string             `bson:"name" json:"name"`
+	Path     string             `bson:"path" json:"path"`
+	Category string             `bson:"category" json:"category"`
+}
+
+type LullabyDetail struct {
+	Name     string `bson:"name" json:"name"`
+	Path     string `bson:"path" json:"path"`
+	Category string `bson:"category" json:"category"`
+}

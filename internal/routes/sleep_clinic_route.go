@@ -13,6 +13,10 @@ import (
 func SleepClinicRoutes(app *fiber.App) {
 	app.Get("/api/v1/sleep-clinic", middlewares.Jwt(), getSleepClinicHandler)
 	app.Put("/api/v1/sleep-clinic/:id", middlewares.Jwt(), updateSleepClinicHandler)
+	// Custom lullaby song routes
+	app.Post("/api/v1/custom-lullaby-song", middlewares.Jwt(), addCustomLullabySongHandler)
+	app.Get("/api/v1/custom-lullaby-song", middlewares.Jwt(), getCustomLullabySongsHandler)
+	app.Get("/api/v1/preset-lullaby-song", getPresetLullabySongsHandler)
 }
 
 // Get Sleep Clinic data handler
@@ -54,4 +58,38 @@ func updateSleepClinicHandler(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(responses.Info("Sleep clinic updated successfully"))
+}
+
+func addCustomLullabySongHandler(c *fiber.Ctx) error {
+	var input models.LullabyDetail
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	claims := c.Locals("l").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))
+
+	if err := services.AddCustomLullabySongService(userID, input.Name, input.Path, input.Category); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Custom lullaby song added successfully"})
+}
+
+func getCustomLullabySongsHandler(c *fiber.Ctx) error {
+	claims := c.Locals("l").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))
+
+	songs, err := services.GetCustomLullabySongsService(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(responses.Info(songs))
+}
+
+func getPresetLullabySongsHandler(c *fiber.Ctx) error {
+	songs, err := services.GetPresetLullabySongsService()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(responses.Info(songs))
 }

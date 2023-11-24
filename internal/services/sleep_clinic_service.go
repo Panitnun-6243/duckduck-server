@@ -11,7 +11,7 @@ func CreateDefaultSleepClinic(userID primitive.ObjectID) (*models.SleepClinic, e
 	sleepClinic := &models.SleepClinic{
 		UserID:                 userID,
 		CurrentLullabySong:     "Twinkle twinkle little star",
-		CurrentLullabySongPath: "",
+		CurrentLullabySongPath: "https://storage.googleapis.com/duckduck-bucket/lullaby-song/noice/twinkle-twinkle-little-star.mp3",
 		DimLight: models.DimLight{
 			IsActive: false,
 			Duration: 5,
@@ -34,4 +34,20 @@ func UpdateUserSleepClinic(sleepClinicID primitive.ObjectID, updatedData *models
 	err := repositories.UpdateSleepClinicData(sleepClinicID, updateMap)
 
 	return err
+}
+
+// AddCustomLullabySongService handles business logic for adding a custom lullaby song.
+func AddCustomLullabySongService(userID primitive.ObjectID, songName, songPath, category string) error {
+	song := models.LullabyDetail{Name: songName, Path: songPath, Category: category}
+	return repositories.AddCustomLullabySong(userID, song)
+}
+
+// GetCustomLullabySongsService retrieves custom lullaby songs for the specified user.
+func GetCustomLullabySongsService(userID primitive.ObjectID) ([]models.LullabyDetail, error) {
+	return repositories.GetCustomLullabySongs(userID)
+}
+
+// GetPresetLullabySongsService retrieves all preset lullaby songs.
+func GetPresetLullabySongsService() ([]models.PresetLullabySong, error) {
+	return repositories.GetPresetLullabySongs()
 }
