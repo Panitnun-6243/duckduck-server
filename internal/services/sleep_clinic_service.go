@@ -9,9 +9,9 @@ import (
 
 func CreateDefaultSleepClinic(userID primitive.ObjectID) (*models.SleepClinic, error) {
 	sleepClinic := &models.SleepClinic{
-		UserID:                userID,
-		CurrentLullabySong:    "Twinkle twinkle little star",
-		CustomLullabySongPath: "",
+		UserID:                 userID,
+		CurrentLullabySong:     "Twinkle twinkle little star",
+		CurrentLullabySongPath: "",
 		DimLight: models.DimLight{
 			IsActive: false,
 			Duration: 5,
@@ -26,10 +26,10 @@ func GetSleepClinicByUser(userID primitive.ObjectID) (*models.SleepClinic, error
 
 func UpdateUserSleepClinic(sleepClinicID primitive.ObjectID, updatedData *models.SleepClinic) error {
 	updateMap := bson.M{
-		"sleep_stats":              updatedData.SleepStats,
-		"current_lullaby_song":     updatedData.CurrentLullabySong,
-		"custom_lullaby_song_path": updatedData.CustomLullabySongPath,
-		"dim_light":                updatedData.DimLight,
+		"sleep_stats":               updatedData.SleepStats,
+		"current_lullaby_song":      updatedData.CurrentLullabySong,
+		"current_lullaby_song_path": updatedData.CurrentLullabySongPath,
+		"dim_light":                 updatedData.DimLight,
 	}
 	err := repositories.UpdateSleepClinicData(sleepClinicID, updateMap)
 

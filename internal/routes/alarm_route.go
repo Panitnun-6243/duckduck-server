@@ -21,6 +21,11 @@ func AlarmRoutes(app *fiber.App) {
 	app.Put("/api/v1/alarms/:id", middlewares.Jwt(), updateAlarmHandler)
 	app.Delete("/api/v1/alarms/:id", middlewares.Jwt(), deleteAlarmHandler)
 	app.Post("/api/v1/alarms/:alarmId/trigger", middlewares.Jwt(), triggerAlarmHandler)
+
+	// Custom alarm sound routes
+	app.Post("/api/v1/custom-alarm-sound", middlewares.Jwt(), addCustomAlarmSoundHandler)
+	app.Get("/api/v1/custom-alarm-sound", middlewares.Jwt(), getCustomAlarmSoundsHandler)
+	app.Get("/api/v1/preset-alarm-sound", getPresetAlarmSoundsHandler)
 }
 
 func createAlarmHandler(c *fiber.Ctx) error {
@@ -170,4 +175,39 @@ func triggerAlarmHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to trigger alarm", err))
 	}
 	return c.Status(fiber.StatusOK).JSON(responses.Info("Alarm is triggered successfully"))
+}
+
+func addCustomAlarmSoundHandler(c *fiber.Ctx) error {
+	var input models.SoundDetail
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	claims := c.Locals("l").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))
+
+	if err := services.AddCustomAlarmSoundService(userID, input.Name, input.Path); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Custom alarm sound added successfully"})
+}
+
+func getCustomAlarmSoundsHandler(c *fiber.Ctx) error {
+	// Extract userID from JWT claims
+	claims := c.Locals("l").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))
+
+	sounds, err := services.GetCustomAlarmSoundsService(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(responses.Info(sounds))
+}
+
+func getPresetAlarmSoundsHandler(c *fiber.Ctx) error {
+	sounds, err := services.GetPresetAlarmSoundsService()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(responses.Info(sounds))
 }

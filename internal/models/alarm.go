@@ -14,8 +14,8 @@ type Alarm struct {
 	IsActive              ActiveStatus       `bson:"is_active" json:"is_active"`
 	RepeatDays            []string           `bson:"repeat_days" json:"repeat_days"`
 	Sunrise               Sunrise            `bson:"sunrise" json:"sunrise"`
-	CurrentWakeupSound    string             `bson:"current_wakeup_sound" json:"current_wakeup_sound"`
-	CustomWakeupSoundPath string             `bson:"custom_wakeup_sound_path" json:"custom_wakeup_sound_path"`
+	CurrentAlarmSound     string             `bson:"current_alarm_sound" json:"current_alarm_sound"`
+	CurrentAlarmSoundPath string             `bson:"current_alarm_sound_path" json:"current_alarm_sound_path"`
 	Volume                float64            `bson:"volume" json:"volume"`
 	SnoozeTime            int                `bson:"snooze_time" json:"snooze_time"`
 	CreatedAt             time.Time          `bson:"created_at" json:"created_at"`
@@ -39,4 +39,23 @@ type Sunrise struct {
 
 type TriggerAlarmRequest struct {
 	ID string `json:"id"`
+}
+
+// CustomAlarmSound represents a user-uploaded custom alarm sound.
+type CustomAlarmSound struct {
+	UserID primitive.ObjectID `bson:"user_id" json:"user_id"`
+	Sounds []SoundDetail      `bson:"sounds" json:"sounds"`
+}
+
+// PresetAlarmSound represents a preset alarm sound provided by the system.
+type PresetAlarmSound struct {
+	ID   primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Name string             `bson:"name" json:"name"`
+	Path string             `bson:"path" json:"path"`
+}
+
+// SoundDetail represents details of a sound.
+type SoundDetail struct {
+	Name string `bson:"name" json:"name"`
+	Path string `bson:"path" json:"path"`
 }

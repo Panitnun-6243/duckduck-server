@@ -35,8 +35,8 @@ func UpdateUserAlarm(alarmID primitive.ObjectID, updatedData *models.Alarm) erro
 		"is_active":                updatedData.IsActive,
 		"repeat_days":              updatedData.RepeatDays,
 		"sunrise":                  updatedData.Sunrise,
-		"current_wakeup_sound":     updatedData.CurrentWakeupSound,
-		"custom_wakeup_sound_path": updatedData.CustomWakeupSoundPath,
+		"current_alarm_sound":      updatedData.CurrentAlarmSound,
+		"current_alarm_sound_path": updatedData.CurrentAlarmSoundPath,
 		"volume":                   updatedData.Volume,
 		"snooze_time":              updatedData.SnoozeTime,
 		"updated_at":               updatedData.UpdatedAt,
@@ -97,4 +97,20 @@ func updateSleepDuration(userID, alarmID primitive.ObjectID) {
 			_ = repositories.UpdateSleepClinicData(sleepClinic.ID, bson.M{"sleep_stats": sleepClinic.SleepStats})
 		}
 	}
+}
+
+// AddCustomAlarmSoundService handles business logic for adding a custom alarm sound.
+func AddCustomAlarmSoundService(userID primitive.ObjectID, soundName, soundPath string) error {
+	sound := models.SoundDetail{Name: soundName, Path: soundPath}
+	return repositories.AddCustomAlarmSound(userID, sound)
+}
+
+// GetCustomAlarmSoundsService retrieves custom alarm sounds for the specified user.
+func GetCustomAlarmSoundsService(userID primitive.ObjectID) ([]models.SoundDetail, error) {
+	return repositories.GetCustomAlarmSounds(userID)
+}
+
+// GetPresetAlarmSoundsService retrieves all preset alarm sounds.
+func GetPresetAlarmSoundsService() ([]models.PresetAlarmSound, error) {
+	return repositories.GetPresetAlarmSounds()
 }
