@@ -64,5 +64,37 @@ func TriggerAlarm(userID primitive.ObjectID, alarmID primitive.ObjectID) error {
 	client := util.CreateMqttClient()
 	util.Publish(client, mqttTopic, string(payload))
 
+	// Calculate sleep duration and update Sleep Clinic data
+	updateSleepDuration(userID, alarmID)
+
 	return nil
+}
+
+func updateSleepDuration(userID, alarmID primitive.ObjectID) {
+	alarm, _ := repositories.FindAlarmByAlarmIDAndUserID(alarmID, userID)
+	if alarm != nil {
+		// Construct time.Time objects from BedTime and WakeUpTime
+		now := time.Now()
+		bedTime := time.Date(now.Year(), now.Month(), now.Day(), alarm.BedTime.Hours, alarm.BedTime.Minutes, 0, 0, now.Location())
+		wakeUpTime := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
+
+		// If wake-up time is before bedtime, it means wake up is on the next day
+		if wakeUpTime.Before(bedTime) {
+			wakeUpTime = wakeUpTime.AddDate(0, 0, 1)
+		}
+
+		// Calculate duration in hours
+		duration := wakeUpTime.Sub(bedTime).Hours()
+
+		// Update Sleep Clinic Data
+		sleepClinic, _ := repositories.FindSleepClinicByUserID(userID)
+		if sleepClinic != nil {
+			sleepStat := models.SleepStat{
+				Date:               now.Format("2006-01-02"),
+				SleepDurationHours: duration,
+			}
+			sleepClinic.SleepStats = append(sleepClinic.SleepStats, sleepStat)
+			_ = repositories.UpdateSleepClinicData(sleepClinic.ID, bson.M{"sleep_stats": sleepClinic.SleepStats})
+		}
+	}
 }
