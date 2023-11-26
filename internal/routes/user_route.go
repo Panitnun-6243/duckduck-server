@@ -1,12 +1,16 @@
 package routes
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/Panitnun-6243/duckduck-server/internal/middlewares"
 	"github.com/Panitnun-6243/duckduck-server/internal/models"
 	"github.com/Panitnun-6243/duckduck-server/internal/responses"
 	"github.com/Panitnun-6243/duckduck-server/internal/services"
+	"github.com/Panitnun-6243/duckduck-server/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func UserRoutes(app *fiber.App) {
@@ -26,6 +30,18 @@ func registerHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(responses.Error("Registration failed", err))
 	}
+	// Publish the update to MQTT
+	deviceCode, err := services.GetDeviceCodeByUserID(registeredUser.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to get device code", err))
+	}
+	mqttTopic := fmt.Sprintf("%s/register", deviceCode)
+	filter := bson.M{
+		"device_code": deviceCode,
+	}
+	payload, _ := json.Marshal(filter) // Convert the updatedControl struct to JSON
+	client := util.CreateMqttClient()
+	util.Publish(client, mqttTopic, string(payload))
 
 	return c.Status(fiber.StatusOK).JSON(responses.Info(registeredUser))
 }
