@@ -38,7 +38,7 @@ func CreateMqttClient() mqtt.Client {
 }
 
 func Publish(client mqtt.Client, topic, payload string) {
-	qos := 0
+	qos := 1
 	if token := client.Publish(topic, byte(qos), false, payload); token.Wait() && token.Error() != nil {
 		fmt.Printf("publish failed, topic: %s, payload: %s\n", topic, payload)
 	} else {
