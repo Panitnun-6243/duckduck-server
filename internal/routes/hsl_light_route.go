@@ -58,6 +58,12 @@ func updateHslLightHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Hsl light update failed", err))
 	}
 
+	// update color_mode to hsl when hsl_color is updated
+	err = services.UpdateUserHslLightColorMode(hslID, "hsl")
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Update mode failed", err))
+	}
+
 	// Publish the update to MQTT
 	deviceCode, err := services.GetDeviceCodeByUserID(userID)
 	if err != nil {

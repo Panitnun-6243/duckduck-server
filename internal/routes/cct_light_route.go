@@ -58,6 +58,12 @@ func updateCctLightHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Cct light update failed", err))
 	}
 
+	// Update the color_mode to "cct"
+	err = services.UpdateUserCctLightColorMode(cctID, "cct")
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Update mode failed", err))
+	}
+
 	// Publish the update to MQTT
 	deviceCode, err := services.GetDeviceCodeByUserID(userID)
 	if err != nil {

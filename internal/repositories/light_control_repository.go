@@ -38,3 +38,11 @@ func UpdateLightControl(controlID primitive.ObjectID, updatedData bson.M) error 
 	_, err := db.GetDB().Collection("light_controls").UpdateOne(context.TODO(), bson.M{"_id": controlID}, bson.M{"$set": updatedData})
 	return err
 }
+
+// UpdateLightControlColorMode Update only color_mode
+func UpdateLightControlColorMode(controlID primitive.ObjectID, colorMode string) error {
+	_, err := db.GetDB().Collection("light_controls").UpdateOne(context.TODO(), bson.M{"_id": controlID}, bson.M{"$set": bson.M{
+		"color_mode": colorMode,
+	}})
+	return err
+}

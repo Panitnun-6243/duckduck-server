@@ -17,3 +17,8 @@ func GetCctLightByIDAndUserID(cctID, userID primitive.ObjectID) (*models.LightCo
 func UpdateUserCctLight(cctID primitive.ObjectID, brightness float64, temp int) error {
 	return repositories.UpdateCctLight(cctID, brightness, temp)
 }
+
+// UpdateUserCctLightColorMode Update only color_mode
+func UpdateUserCctLightColorMode(cctID primitive.ObjectID, colorMode string) error {
+	return repositories.UpdateLightControlColorMode(cctID, colorMode)
+}

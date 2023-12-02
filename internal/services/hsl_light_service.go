@@ -17,3 +17,8 @@ func GetHslLightByIDAndUserID(hslID, userID primitive.ObjectID) (*models.LightCo
 func UpdateUserHslLight(hslID primitive.ObjectID, hslLight models.Hsl) error {
 	return repositories.UpdateHslLight(hslID, hslLight)
 }
+
+// UpdateUserHslLightColorMode Update only color_mode
+func UpdateUserHslLightColorMode(hslID primitive.ObjectID, colorMode string) error {
+	return repositories.UpdateLightControlColorMode(hslID, colorMode)
+}
