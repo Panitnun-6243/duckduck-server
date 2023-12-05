@@ -26,7 +26,6 @@ func GetSleepClinicByUser(userID primitive.ObjectID) (*models.SleepClinic, error
 
 func UpdateUserSleepClinic(sleepClinicID primitive.ObjectID, updatedData *models.SleepClinic) error {
 	updateMap := bson.M{
-		"sleep_stats":               updatedData.SleepStats,
 		"current_lullaby_song":      updatedData.CurrentLullabySong,
 		"current_lullaby_song_path": updatedData.CurrentLullabySongPath,
 		"dim_light":                 updatedData.DimLight,
