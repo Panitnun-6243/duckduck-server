@@ -1,17 +1,22 @@
 package routes
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/Panitnun-6243/duckduck-server/internal/middlewares"
 	"github.com/Panitnun-6243/duckduck-server/internal/models"
 	"github.com/Panitnun-6243/duckduck-server/internal/responses"
 	"github.com/Panitnun-6243/duckduck-server/internal/services"
+	"github.com/Panitnun-6243/duckduck-server/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func SleepClinicRoutes(app *fiber.App) {
 	app.Get("/api/v1/sleep-clinic", middlewares.Jwt(), getSleepClinicHandler)
+	app.Get("/api/v1/sweet-dreams", middlewares.Jwt(), getSweetDreamsHandler)
 	app.Put("/api/v1/sleep-clinic/:id", middlewares.Jwt(), updateSleepClinicHandler)
 	// Custom lullaby song routes
 	app.Post("/api/v1/custom-lullaby-song", middlewares.Jwt(), addCustomLullabySongHandler)
@@ -28,6 +33,21 @@ func getSleepClinicHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(responses.Error("Sleep clinic data not found", err))
 	}
 	return c.Status(fiber.StatusOK).JSON(responses.Info(sleepClinic))
+}
+
+// Get Sleep Clinic data handler but only dim light and current lullaby song
+func getSweetDreamsHandler(c *fiber.Ctx) error {
+	claims := c.Locals("l").(*jwt.Token).Claims.(jwt.MapClaims)
+	userID, _ := primitive.ObjectIDFromHex(claims["sub"].(string))
+	sleepClinic, err := services.GetSleepClinicByUser(userID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(responses.Error("Sweet dreams data not found", err))
+	}
+	return c.Status(fiber.StatusOK).JSON(responses.Info(bson.M{
+		"dim_light":                 sleepClinic.DimLight,
+		"current_lullaby_song":      sleepClinic.CurrentLullabySong,
+		"current_lullaby_song_path": sleepClinic.CurrentLullabySongPath,
+	}))
 }
 
 // Update Sleep Clinic data handler
@@ -56,6 +76,21 @@ func updateSleepClinicHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Sleep clinic update failed", err))
 	}
+
+	// Publish the update to MQTT
+	deviceCode, err := services.GetDeviceCodeByUserID(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(responses.Error("Failed to get device code", err))
+	}
+	mqttTopic := fmt.Sprintf("%s/update-sweet-dreams", deviceCode)
+	filter := bson.M{
+		"current_lullaby_song":      updatedSleepClinic.CurrentLullabySong,
+		"current_lullaby_song_path": updatedSleepClinic.CurrentLullabySongPath,
+		"dim_light":                 updatedSleepClinic.DimLight,
+	}
+	payload, _ := json.Marshal(filter) // Convert the updatedControl struct to JSON
+	client := util.CreateMqttClient()
+	util.Publish(client, mqttTopic, string(payload))
 
 	return c.Status(fiber.StatusOK).JSON(responses.Info("Sleep clinic updated successfully"))
 }
